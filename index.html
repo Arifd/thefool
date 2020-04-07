@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+  }
+
+  html, body {
+    background:rgb(142,142,142);
+    background: radial-gradient(circle, rgba(255,255,255,1) 25%, rgba(142,142,142,1) 100%);
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    overflow: hidden;
+  }
+
+  #img-container {
+    overflow: hidden;
+    position: relative;
+    background: #4B79A1;
+    /* background: linear-gradient(15deg, rgba(131,58,180,0.5) 0%, rgba(253,29,29,0.5) 50%, rgba(252,176,69,0.5) 100%); */
+    box-shadow: inset 0px 0px 20px 0px rgba(0,0,0,0.75), 0px 0px 12px 0px rgba(0,0,0,0.75);
+    /* width: 820px; */
+    /* height: 1397px; */
+    width: 58.697208303vh;
+    height: 100vh;
+  }
+
+  .img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .elena-drawn {
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+  }
+
+  #stars {
+    background-image: url(assets/stars.png);
+    background-repeat: repeat;
+    animation: radial 2000s linear infinite;
+  }
+
+  @keyframes move {
+    0% {transform: translateX(0vw);}
+    100% {transform: translateX(100vw);}
+  }
+
+  @keyframes radial {
+    0% {transform: translateX(0vw) rotate(0deg);}
+    100%  {transform: translateX(400vw) rotate(-360deg);}   
+  }
+
+  #rock-man {background-image: url("assets/rock-man.png");}
+
+  #mountain {
+    background-image: url("assets/mountain.png");
+    transform: scale(1.05);
+  }
+
+  #border-sun {background-image: url("assets/border-sun.png");}
+
+  .shooting-star{
+    position: absolute;
+    background-color: white;
+    width: 45px;
+    height: 2px;
+    animation: shoot 10s linear infinite;
+    opacity: 0.5;
+    transform: rotate(30deg);
+  }
+
+  @keyframes shoot{
+    4% {transform: rotate(30deg) translate(200vh , 0);}
+    100%{transform: rotate(30deg) translate(200vh , 0);}
+  }
+</style>
+</head>
+<body>
+  <div id='img-container'>
+    <div id='night-sky'></div>
+    <div id='day-sky'></div>
+    <div id='stars' class='img'></div>
+    <div class='shooting-star img'></div>
+    <div id='mountain' class='img elena-drawn'></div>
+    <div id='rock-man' class='img elena-drawn'></div>
+    <div id='border-sun' class='img elena-drawn'></div>
+  </div>
+  <!-- <iframe style="position:absolute; top:-1000; left:-1000; z-index: -1;" width="100%" height="300" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/464175222&color=%23ff5500&auto_play=true&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true"></iframe> -->
+</body>
+
+<script>
+  const clamp = (val, min, max) => Math.min(Math.max(min, val), max);
+  const sigmoid = (val) => 1 / (1 + Math.exp(5+val*(-10)));
+
+  const imgContainer = document.getElementById('img-container');
+  const rockMan = document.getElementById('rock-man');
+  const mountain = document.getElementById('mountain');
+  
+  (function forceMostlyFullScreen() {
+    const height = (window.innerHeight * 90) / 100; // 90%
+    const width = 0.58697208303 * height;
+    imgContainer.style.width = width + 'px';
+    imgContainer.style.height = height + 'px';
+    // push down to center
+    imgContainer.style.top = window.innerHeight * 5 / 100 + 'px';
+  })();
+
+  // morph from day to night
+  const nightSky = document.getElementById('night-sky');
+  nightSky.className = 'img';
+  nightSky.style.background = 'linear-gradient(to top, #283E51, #0A2342)';
+  nightSky.style.transition = 'opacity 60s linear';
+  const daySky = document.getElementById('day-sky');
+  daySky.className = 'img';
+  daySky.style.background = 'linear-gradient(15deg, rgba(131,58,180,0.75) 0%, rgba(253,29,29,0.75) 50%, rgba(252,176,69,0.75) 100%)';
+  daySky.style.transition = 'opacity 60s linear';
+  requestAnimationFrame(()=>{
+    daySky.style.opacity = 0;
+    nightSky.style.opacity = 1;
+    });
+
+  // create random ballons and watch them float!
+  (function genBalloon(){
+    const balloon = document.createElement('img');
+    const scale = Math.random();
+    const width = (scale*132)/2;
+    const height = (scale*183)/2;
+    const predelayMS = 5000; // time before rising animation starts
+    const riseTimeS = 60 /* minimum speed */ + (1-scale)*60; // smaller objects -> further back -> slower speed  
+    balloon.src = 'assets/balloon.png';
+    balloon.width = width;
+    balloon.height = height;
+    // balloon.style.boxShadow = '0px 0px ${scale*20}px 0px rgba(0,0,0,1)';
+    balloon.style.filter = `sepia(100%) saturate(300%) brightness(70%) hue-rotate(${Math.random()*360}deg) drop-shadow(0px 0px 1px rgba(0,0,0,0.75))`;
+    balloon.style.transform = 'translateY(100vh)';
+    balloon.style.transition = `transform ${riseTimeS}s linear`;
+    balloon.style.position = 'absolute';
+    balloon.style.left = `${Math.random()*(imgContainer.offsetWidth-width)}px`;
+    
+    scale > 0.5 ?
+      imgContainer.insertBefore(balloon, rockMan):
+      imgContainer.insertBefore(balloon, mountain);
+
+    // trigger rise animation
+    const force = (Math.random()*100-50) * scale;
+    setTimeout(()=>balloon.style.transform = `translateY(-${height}px) translateX(${force}px)`, predelayMS);
+    // delete yourself when risen
+    setTimeout(()=> balloon.remove(), riseTimeS*1000+predelayMS);
+    // trigger another balloon
+    setTimeout(genBalloon, `${Math.random()*10000}`);
+  })();
+
+  // modulate images with input
+
+  let inputX, inputY = 0;
+
+  window.addEventListener('deviceorientation', e => {
+    inputX = (clamp(e.gamma, -30, 30) + 30) / 60;
+    inputY = (clamp(e.beta, 22.5, 67.5) - 22.5) / 45;
+    requestAnimationFrame(update);
+  });
+
+  window.addEventListener('mousemove', e => {
+    inputX = e.clientX/window.innerWidth;
+    inputY = e.clientY/window.innerHeight;
+
+    // document.body.innerHTML = inputX;
+    requestAnimationFrame(update);
+  });
+
+  function update() {
+    translateImage(inputX, inputY);
+  };
+
+  // parralax transform the image based on input data
+  function translateImage(normalizedX, normalizedY) {
+    const transformX = sigmoid(normalizedX) * 8;
+    const transformY = sigmoid(normalizedY) * 8;
+    
+    // gesture X
+    // stars.style.backgroundPositionX = (1-transformX) * 0.1 + 'px';
+    mountain.style.backgroundPositionX = -(transformX-4) * 0.666 + 'px';
+    rockMan.style.backgroundPositionX = transformX + 'px';
+    
+    // gesture Y
+    // stars.style.backgroundPositionY = (1-transformY) * 0.1 + 'px';
+    mountain.style.backgroundPositionY = -(transformY-4) + 'px';
+    rockMan.style.backgroundPositionY = transformY + 'px';
+  }
+
+</script>
+</html>
