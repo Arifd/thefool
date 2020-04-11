@@ -116,6 +116,8 @@
     imgContainer.style.top = window.innerHeight * 5 / 100 + 'px';
   })();
 
+  window.addEventListener('resize', forceMostlyFullScreen);
+
   // morph from day to night
   const nightSky = document.getElementById('night-sky');
   nightSky.className = 'img';
