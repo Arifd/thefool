@@ -107,15 +107,16 @@
   const rockMan = document.getElementById('rock-man');
   const mountain = document.getElementById('mountain');
   
-  (function forceMostlyFullScreen() {
+  function forceMostlyFullScreen() {
     const height = (window.innerHeight * 90) / 100; // 90%
     const width = 0.58697208303 * height;
     imgContainer.style.width = width + 'px';
     imgContainer.style.height = height + 'px';
     // push down to center
     imgContainer.style.top = window.innerHeight * 5 / 100 + 'px';
-  })();
+  };
 
+  forceMostlyFullScreen();
   window.addEventListener('resize', forceMostlyFullScreen);
 
   // morph from day to night
